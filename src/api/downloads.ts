@@ -66,10 +66,11 @@ router.get('/health', async (_req: Request, res: Response) => {
 router.post('/metadata', async (req: Request, res: Response) => {
   const { url } = req.body;
   if (!url || typeof url !== 'string') {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       error: { code: 'INVALID_URL', message: 'URL is required' },
     });
+    return;
   }
 
   try {
@@ -90,10 +91,11 @@ router.post('/metadata', async (req: Request, res: Response) => {
 router.post('/check-url', async (req: Request, res: Response) => {
   const { url } = req.body;
   if (!url || typeof url !== 'string') {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       error: { code: 'INVALID_URL', message: 'URL is required' },
     });
+    return;
   }
 
   try {
@@ -139,10 +141,11 @@ router.post('/start', async (req: Request, res: Response) => {
   const { url, quality, format, extractAudio, maxFileSize, priority } = req.body;
 
   if (!url || typeof url !== 'string') {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       error: { code: 'INVALID_URL', message: 'URL is required' },
     });
+    return;
   }
 
   try {
@@ -150,7 +153,7 @@ router.post('/start', async (req: Request, res: Response) => {
     const storage = await getDownloadStorage();
     const existing = storage.getFileByUrl(url);
     if (existing) {
-      return res.json({
+      res.json({
         success: true,
         data: {
           job: null,
@@ -159,6 +162,7 @@ router.post('/start', async (req: Request, res: Response) => {
           message: 'File already downloaded',
         },
       });
+      return;
     }
 
     const queue = getDownloadQueue();
@@ -230,17 +234,19 @@ router.post('/batch', async (req: Request, res: Response) => {
   const { urls, quality, format } = req.body;
 
   if (!Array.isArray(urls) || urls.length === 0) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       error: { code: 'INVALID_URLS', message: 'Array of URLs is required' },
     });
+    return;
   }
 
   if (urls.length > 20) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       error: { code: 'TOO_MANY_URLS', message: 'Maximum 20 URLs per batch' },
     });
+    return;
   }
 
   try {
@@ -317,10 +323,11 @@ router.get('/jobs/:id', (req: Request, res: Response) => {
   const job = queue.getJob(req.params.id);
 
   if (!job) {
-    return res.status(404).json({
+    res.status(404).json({
       success: false,
       error: { code: 'JOB_NOT_FOUND', message: `Job ${req.params.id} not found` },
     });
+    return;
   }
 
   res.json({
@@ -358,10 +365,11 @@ router.delete('/jobs/:id', (req: Request, res: Response) => {
   const job = queue.getJob(req.params.id);
 
   if (!job) {
-    return res.status(404).json({
+    res.status(404).json({
       success: false,
       error: { code: 'JOB_NOT_FOUND', message: `Job ${req.params.id} not found` },
     });
+    return;
   }
 
   if (job.status === 'queued' || job.status === 'downloading' || job.status === 'processing') {
@@ -402,10 +410,11 @@ router.get('/files/:id/thumbnail', async (req: Request, res: Response) => {
     const storage = await getDownloadStorage();
     const file = storage.getFile(req.params.id);
     if (!file) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: { code: 'FILE_NOT_FOUND', message: 'File not found' },
       });
+      return;
     }
 
     if (file.thumbnailPath) {
@@ -443,10 +452,11 @@ router.get('/files/:id/info', async (req: Request, res: Response) => {
     const storage = await getDownloadStorage();
     const file = storage.getFile(req.params.id);
     if (!file) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: { code: 'FILE_NOT_FOUND', message: 'File not found' },
       });
+      return;
     }
 
     const info = await getVideoInfo(file.absolutePath);
@@ -468,10 +478,11 @@ router.delete('/files/:id', async (req: Request, res: Response) => {
     const storage = await getDownloadStorage();
     const deleted = await storage.deleteFile(req.params.id);
     if (!deleted) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: { code: 'FILE_NOT_FOUND', message: 'File not found' },
       });
+      return;
     }
     res.json({ success: true, data: { deleted: true, id: req.params.id } });
   } catch (err) {

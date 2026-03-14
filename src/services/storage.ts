@@ -51,7 +51,7 @@ export async function fileExists(filePath: string): Promise<boolean> {
   }
 }
 
-export async function generateThumbnail(
+export async function generateStorageThumbnail(
   _inputPath: string, 
   outputPath: string
 ): Promise<string> {
